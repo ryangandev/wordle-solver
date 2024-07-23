@@ -49,7 +49,7 @@ const GridInput: React.FC<GridInputProps> = ({
             inputRefs.current[index] = el;
           }}
           className={cn(
-            'flex h-12 w-12 items-center justify-center border border-gray-400 text-center text-2xl font-bold uppercase text-primary-foreground caret-black',
+            'flex h-12 w-12 items-center justify-center rounded-sm border border-gray-400 text-center text-2xl font-bold uppercase text-primary-foreground caret-black',
             letter && inputBackgroundColor,
             letter && 'border-none',
           )}

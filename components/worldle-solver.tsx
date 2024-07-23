@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useMemo, useState } from 'react';
+import { toast } from 'sonner';
 
 import GameSelect from '@/components/game-select';
 import GridInput from '@/components/grid-input';
@@ -91,6 +92,11 @@ const WordleSolver = () => {
   };
 
   const handleSolve = async () => {
+    if (!isLetterStateModified) {
+      toast.warning('Enter at least one letter to start!');
+      return;
+    }
+
     setPossibleWords([]);
     setIsLoading(true);
 
@@ -111,6 +117,41 @@ const WordleSolver = () => {
       invalid: Array(wordleSize).fill(''),
     });
     setPossibleWords([]);
+  };
+
+  const handleInvalidLetterChange = (newInputs: string[]) => {
+    // Create a Set of valid letters
+    const validLettersSet = new Set(
+      [...letterState.correct, ...letterState.misplaced].filter(
+        (letter) => letter !== '',
+      ),
+    );
+
+    const filteredNewInputs = newInputs.filter((letter) => letter !== '');
+    const invalidLetterSet = new Set(filteredNewInputs);
+
+    // Find conflicting letters
+    const conflictingGoodAndBadLetters = newInputs.filter(
+      (letter) => letter !== '' && validLettersSet.has(letter),
+    );
+
+    if (conflictingGoodAndBadLetters.length > 0) {
+      toast.warning(
+        `You can't put "${conflictingGoodAndBadLetters[0].toUpperCase()}" in GOOD and BAD spots at the same time!`,
+      );
+      return;
+    }
+
+    if (invalidLetterSet.size !== filteredNewInputs.length) {
+      toast.warning(`You can't put the same letter multiple times!`);
+      return;
+    }
+
+    // If no conflict, update the state with new inputs
+    setLetterState((prev) => ({
+      ...prev,
+      invalid: newInputs,
+    }));
   };
 
   return (
@@ -156,12 +197,7 @@ const WordleSolver = () => {
             </Badge>
             <GridInput
               letterInputs={letterState.invalid}
-              onInputChange={(newInputs: string[]) => {
-                setLetterState((prev) => ({
-                  ...prev,
-                  invalid: newInputs,
-                }));
-              }}
+              onInputChange={handleInvalidLetterChange}
               inputBackgroundColor="bg-gray-500"
             />
             <small className="mx-auto flex cursor-pointer flex-row items-center hover:opacity-70">
@@ -174,7 +210,7 @@ const WordleSolver = () => {
           <Button
             className="w-fit"
             onClick={handleClear}
-            disabled={isLetterStateModified}
+            disabled={!isLetterStateModified}
             variant="default"
           >
             Clear

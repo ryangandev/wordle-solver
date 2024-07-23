@@ -1,5 +1,3 @@
-'use client';
-
 import WordleSolver from '@/components/worldle-solver';
 
 const Home = () => {

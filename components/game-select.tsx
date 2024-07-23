@@ -30,7 +30,7 @@ const GameSelect: React.FC<GameSelectProps> = ({
           {wordleSize} Letter Word
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-44 text-center">
+      <DropdownMenuContent className="w-42 text-center">
         <DropdownMenuLabel>Choose Wordle Size</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {wordleSizes.map((size) => (
