@@ -1,31 +1,29 @@
 'use client';
 
-import React, { useRef, ChangeEvent, KeyboardEvent, useEffect } from 'react';
+import React, { useRef, ChangeEvent, KeyboardEvent } from 'react';
 
 import { cn } from '@/lib/utils';
 
 type GridInputProps = {
   letterInputs: string[];
-  onInputChange: (newInputs: string[]) => void;
+  onInputChange: (index: number, value: string) => boolean;
   inputBackgroundColor?: string;
+  className?: string;
 };
 
 const GridInput: React.FC<GridInputProps> = ({
   letterInputs,
   onInputChange,
   inputBackgroundColor = 'transparent',
+  className,
 }) => {
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const handleChange = (index: number, value: string) => {
-    if (!/^[a-zA-Z]$/.test(value) && value !== '') return;
-
-    const newInputs = [...letterInputs];
-    newInputs[index] = value;
-    onInputChange(newInputs);
+    const result = onInputChange(index, value);
 
     // Focus next input
-    if (value !== '' && index < letterInputs.length - 1) {
+    if (result && value !== '' && index < letterInputs.length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
   };
@@ -41,7 +39,12 @@ const GridInput: React.FC<GridInputProps> = ({
   };
 
   return (
-    <div className="flex space-x-1.5">
+    <div
+      className={cn(
+        'grid auto-rows-max grid-cols-6 gap-1 sm:gap-1.5',
+        className,
+      )}
+    >
       {letterInputs.map((letter, index) => (
         <input
           key={index}
@@ -49,7 +52,7 @@ const GridInput: React.FC<GridInputProps> = ({
             inputRefs.current[index] = el;
           }}
           className={cn(
-            'flex h-12 w-12 items-center justify-center rounded-sm border border-gray-400 text-center text-2xl font-bold uppercase text-primary-foreground caret-black',
+            'flex h-11 w-11 items-center justify-center rounded-sm border border-gray-400 text-center text-2xl font-bold uppercase text-primary-foreground caret-black sm:h-12 sm:w-12',
             letter && inputBackgroundColor,
             letter && 'border-none',
           )}

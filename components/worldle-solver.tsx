@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { IoWarningOutline } from 'react-icons/io5';
 import { toast } from 'sonner';
+import { TrashIcon } from '@radix-ui/react-icons';
 
 import GameSelect from '@/components/game-select';
 import GridInput from '@/components/grid-input';
 import Results from '@/components/results';
-import { Badge } from '@/components/ui/badge';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -14,50 +16,152 @@ import {
   CardFooter,
   CardHeader,
 } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import { getWordsBySize } from '@/lib/data';
-import { LetterState, WordleSize } from '@/lib/types';
-import { PlusCircledIcon } from '@radix-ui/react-icons';
+import { ValidLetterState, WordleSize } from '@/lib/types';
 
 const WordleSolver = () => {
   const [wordleSize, setWordleSize] = useState<WordleSize>(5);
-  const [letterState, setLetterState] = useState<LetterState>({
+  const [validLetterState, setValidLetterState] = useState<ValidLetterState>({
     correct: Array(wordleSize).fill(''),
     misplaced: Array(wordleSize).fill(''),
-    invalid: Array(wordleSize).fill(''),
   });
+  const [invalidLetterState, setInvalidLetterState] = useState<string>('');
+  const [errorMsg, setErrorMsg] = useState<string>('');
   const [possibleWords, setPossibleWords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const wordBank = useMemo(() => getWordsBySize(wordleSize), [wordleSize]);
 
-  useEffect(() => {
-    setLetterState({
+  // Reset all letter states
+  const handleReset = useCallback(() => {
+    setValidLetterState({
       correct: Array(wordleSize).fill(''),
       misplaced: Array(wordleSize).fill(''),
-      invalid: Array(wordleSize).fill(''),
     });
+    setInvalidLetterState('');
     setPossibleWords([]);
+    setErrorMsg('');
   }, [wordleSize]);
 
+  useEffect(() => {
+    handleReset();
+  }, [handleReset, wordleSize]);
+
   const isLetterStateModified = !(
-    letterState.correct.every((letter) => letter === '') &&
-    letterState.misplaced.every((letter) => letter === '') &&
-    letterState.invalid.every((letter) => letter === '')
+    validLetterState.correct.every((letter) => letter === '') &&
+    validLetterState.misplaced.every((letter) => letter === '') &&
+    invalidLetterState === ''
   );
+
+  // Handle letter state changes based on type
+  const handleValidLetterStateChange = (
+    type: 'correct' | 'misplaced',
+    index: number,
+    value: string,
+  ): boolean => {
+    setErrorMsg('');
+    if (!/^[a-zA-Z]$/.test(value) && value !== '') return false;
+
+    const lowerCaseValue = value.toLowerCase();
+    if (lowerCaseValue !== '' && invalidLetterState.includes(lowerCaseValue)) {
+      setErrorMsg(
+        `You can't put "${lowerCaseValue.toUpperCase()}" in GOOD and BAD spots at the same time`,
+      );
+      return false;
+    }
+
+    setValidLetterState((prev) => {
+      const newState = {
+        correct: [...prev.correct],
+        misplaced: [...prev.misplaced],
+      };
+
+      newState[type][index] = lowerCaseValue;
+
+      const oppositeType = type === 'correct' ? 'misplaced' : 'correct';
+      if (
+        lowerCaseValue === prev[oppositeType][index] &&
+        lowerCaseValue !== ''
+      ) {
+        newState[oppositeType][index] = '';
+      }
+
+      return newState;
+    });
+
+    return true;
+  };
+
+  // On change function for correct letter state, variants of handleValidLetterStateChange
+  const handleCorrectLetterStateChange = (
+    index: number,
+    value: string,
+  ): boolean => {
+    return handleValidLetterStateChange('correct', index, value);
+  };
+
+  // On change function for misplaced letter state, variants of handleValidLetterStateChange
+  const handleMisplacedLetterStateChange = (
+    index: number,
+    value: string,
+  ): boolean => {
+    return handleValidLetterStateChange('misplaced', index, value);
+  };
+
+  const handleInvalidLetterStateChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    setErrorMsg('');
+    const newInput = event.target.value.toLowerCase().replace(/[^a-z]/g, '');
+
+    // Check for duplicates within the new input
+    if (new Set(newInput).size !== newInput.length) {
+      setErrorMsg(`You can't add the same letter twice`);
+      return;
+    }
+
+    // Check if any character in the new input is already in correct or misplaced arrays
+    const allValidLetters = new Set(
+      [...validLetterState.correct, ...validLetterState.misplaced].filter(
+        (char) => char !== '',
+      ),
+    );
+    for (const char of newInput) {
+      if (allValidLetters.has(char)) {
+        setErrorMsg(
+          `You can't put "${char.toUpperCase()}" in GOOD and BAD spots at the same time`,
+        );
+        return;
+      }
+    }
+
+    setInvalidLetterState(newInput);
+  };
+
+  // Clear letters based on type
+  const handleClearletters = (type: 'correct' | 'misplaced' | 'invalid') => {
+    if (type === 'invalid') {
+      setInvalidLetterState('');
+    } else {
+      setValidLetterState((prev) => ({
+        ...prev,
+        [type]: Array(wordleSize).fill(''),
+      }));
+    }
+  };
 
   // Get filtered words based on letterState
   const getFilteredWords = async () => {
     return new Promise<string[]>((resolve) => {
       setTimeout(() => {
         // Turn invalid letters array into a set for O(1) lookups
-        const invalidLettersSet = new Set(
-          letterState.invalid.filter((letter) => letter !== ''),
-        );
+        const invalidLettersSet = new Set(invalidLetterState);
 
         const filteredWords = wordBank.filter((word) => {
           // Check for correct letters
           for (let i = 0; i < wordleSize; i++) {
-            const correctLetter = letterState.correct[i];
+            const correctLetter = validLetterState.correct[i];
             if (correctLetter && word[i] !== correctLetter) {
               return false;
             }
@@ -65,7 +169,7 @@ const WordleSolver = () => {
 
           // Check for misplaced letters
           for (let i = 0; i < wordleSize; i++) {
-            const misplacedLetter = letterState.misplaced[i];
+            const misplacedLetter = validLetterState.misplaced[i];
             if (misplacedLetter) {
               if (
                 !word.includes(misplacedLetter) ||
@@ -87,10 +191,11 @@ const WordleSolver = () => {
         });
 
         resolve(filteredWords);
-      }, 0);
+      }, 250);
     });
   };
 
+  // Solve handler function
   const handleSolve = async () => {
     if (!isLetterStateModified) {
       toast.warning('Enter at least one letter to start!');
@@ -110,113 +215,76 @@ const WordleSolver = () => {
     }
   };
 
-  const handleClear = () => {
-    setLetterState({
-      correct: Array(wordleSize).fill(''),
-      misplaced: Array(wordleSize).fill(''),
-      invalid: Array(wordleSize).fill(''),
-    });
-    setPossibleWords([]);
-  };
-
-  const handleInvalidLetterChange = (newInputs: string[]) => {
-    // Create a Set of valid letters
-    const validLettersSet = new Set(
-      [...letterState.correct, ...letterState.misplaced].filter(
-        (letter) => letter !== '',
-      ),
-    );
-
-    const filteredNewInputs = newInputs.filter((letter) => letter !== '');
-    const invalidLetterSet = new Set(filteredNewInputs);
-
-    // Find conflicting letters
-    const conflictingGoodAndBadLetters = newInputs.filter(
-      (letter) => letter !== '' && validLettersSet.has(letter),
-    );
-
-    if (conflictingGoodAndBadLetters.length > 0) {
-      toast.warning(
-        `You can't put "${conflictingGoodAndBadLetters[0].toUpperCase()}" in GOOD and BAD spots at the same time!`,
-      );
-      return;
-    }
-
-    if (invalidLetterSet.size !== filteredNewInputs.length) {
-      toast.warning(`You can't put the same letter multiple times!`);
-      return;
-    }
-
-    // If no conflict, update the state with new inputs
-    setLetterState((prev) => ({
-      ...prev,
-      invalid: newInputs,
-    }));
-  };
-
   return (
     <section className="flex w-full max-w-3xl flex-col items-center space-y-4">
-      <Card className="w-fit min-w-96 rounded-sm p-2">
-        <CardHeader>
+      <Card className="flex min-w-[350px] flex-col items-center rounded-sm p-2 sm:w-[384px]">
+        <CardHeader className="flex w-full justify-between">
           <GameSelect wordleSize={wordleSize} setWordleSize={setWordleSize} />
         </CardHeader>
-        <CardContent className="flex flex-col items-center space-y-4">
+        <CardContent className="flex w-full flex-col space-y-4">
           <div className="space-y-3">
-            <Badge className="bg-green-700" variant={'custom'} size={'md'}>
-              Correct Letters
-            </Badge>
+            <div className="flex items-center">
+              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700" />
+              <span className="font-semibold">Correct Letters</span>
+              <ClearIconButton onClick={() => handleClearletters('correct')} />
+            </div>
             <GridInput
-              letterInputs={letterState.correct}
-              onInputChange={(correctInputs: string[]) => {
-                setLetterState((prev) => ({
-                  ...prev,
-                  correct: correctInputs,
-                }));
-              }}
+              letterInputs={validLetterState.correct}
+              onInputChange={handleCorrectLetterStateChange}
               inputBackgroundColor="bg-green-700"
             />
           </div>
           <div className="space-y-3">
-            <Badge className="bg-yellow-500" variant={'custom'} size={'md'}>
-              Misplaced Letters
-            </Badge>
+            <div className="flex items-center">
+              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-yellow-500" />
+              <span className="font-semibold">Misplaced Letters</span>
+              <ClearIconButton
+                onClick={() => handleClearletters('misplaced')}
+              />
+            </div>
             <GridInput
-              letterInputs={letterState.misplaced}
-              onInputChange={(newInputs: string[]) => {
-                setLetterState((prev) => ({
-                  ...prev,
-                  misplaced: newInputs,
-                }));
-              }}
+              letterInputs={validLetterState.misplaced}
+              onInputChange={handleMisplacedLetterStateChange}
               inputBackgroundColor="bg-yellow-500"
             />
           </div>
           <div className="flex flex-col space-y-3">
-            <Badge className="w-fit bg-gray-500" variant={'custom'} size={'md'}>
-              Invalid Letters
-            </Badge>
-            <GridInput
-              letterInputs={letterState.invalid}
-              onInputChange={handleInvalidLetterChange}
-              inputBackgroundColor="bg-gray-500"
+            <div className="flex items-center">
+              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-gray-500" />
+              <span className="font-semibold">Invalid Letters</span>
+              <ClearIconButton onClick={() => handleClearletters('invalid')} />
+            </div>
+            <Input
+              className="h-10 w-full text-base font-bold uppercase tracking-widest"
+              value={invalidLetterState}
+              onChange={handleInvalidLetterStateChange}
+              maxLength={26}
             />
-            <small className="mx-auto flex cursor-pointer flex-row items-center hover:opacity-70">
-              <PlusCircledIcon className="mr-1.5" />
-              Add More
-            </small>
           </div>
+          {errorMsg && (
+            <Alert
+              variant={'destructive'}
+              className="rounded bg-destructive/10 py-2 text-red-800"
+            >
+              <AlertDescription className="flex items-center text-xs font-semibold">
+                <span className="mr-2">
+                  <IoWarningOutline className="h-4 w-4" />
+                </span>
+                <span>{errorMsg}</span>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex w-full justify-between">
           <Button
-            className="w-fit"
-            onClick={handleClear}
-            disabled={!isLetterStateModified}
-            variant="default"
+            variant="destructive"
+            onClick={handleReset}
+            disabled={!isLetterStateModified && !possibleWords.length}
           >
-            Clear
+            Reset
           </Button>
-          <Button className="w-fit" onClick={handleSolve} disabled={false}>
-            Make Guesses
+          <Button onClick={handleSolve} disabled={false}>
+            Solve
           </Button>
         </CardFooter>
       </Card>
@@ -226,3 +294,14 @@ const WordleSolver = () => {
 };
 
 export default WordleSolver;
+
+const ClearIconButton = ({ onClick }: { onClick?: () => void }) => {
+  return (
+    <button
+      className="ml-auto cursor-pointer rounded-sm p-1 transition-colors hover:bg-gray-200"
+      onClick={onClick}
+    >
+      <TrashIcon />
+    </button>
+  );
+};

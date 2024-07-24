@@ -1,6 +1,7 @@
 'use client';
 
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
+import { ChevronDownIcon } from '@radix-ui/react-icons';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -28,6 +29,7 @@ const GameSelect: React.FC<GameSelectProps> = ({
       <DropdownMenuTrigger asChild>
         <Button variant="outline" className="w-fit shadow-md">
           {wordleSize} Letter Word
+          <ChevronDownIcon className="ml-2 h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-42 text-center">
