@@ -30,6 +30,7 @@ const WordleSolver = () => {
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [possibleWords, setPossibleWords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [currentResultPage, setCurrentResultPage] = useState<number>(1);
 
   const wordBank = useMemo(() => getWordsBySize(wordleSize), [wordleSize]);
 
@@ -42,6 +43,7 @@ const WordleSolver = () => {
     setInvalidLetterState('');
     setPossibleWords([]);
     setErrorMsg('');
+    setCurrentResultPage(1);
   }, [wordleSize]);
 
   useEffect(() => {
@@ -55,59 +57,61 @@ const WordleSolver = () => {
   );
 
   // Handle letter state changes based on type
-  const handleValidLetterStateChange = (
-    type: 'correct' | 'misplaced',
-    index: number,
-    value: string,
-  ): boolean => {
-    setErrorMsg('');
-    if (!/^[a-zA-Z]$/.test(value) && value !== '') return false;
+  const handleValidLetterStateChange = useCallback(
+    (type: 'correct' | 'misplaced', index: number, value: string): boolean => {
+      setErrorMsg('');
+      if (!/^[a-zA-Z]$/.test(value) && value !== '') return false;
 
-    const lowerCaseValue = value.toLowerCase();
-    if (lowerCaseValue !== '' && invalidLetterState.includes(lowerCaseValue)) {
-      setErrorMsg(
-        `You can't put "${lowerCaseValue.toUpperCase()}" in GOOD and BAD spots at the same time`,
-      );
-      return false;
-    }
-
-    setValidLetterState((prev) => {
-      const newState = {
-        correct: [...prev.correct],
-        misplaced: [...prev.misplaced],
-      };
-
-      newState[type][index] = lowerCaseValue;
-
-      const oppositeType = type === 'correct' ? 'misplaced' : 'correct';
+      const lowerCaseValue = value.toLowerCase();
       if (
-        lowerCaseValue === prev[oppositeType][index] &&
-        lowerCaseValue !== ''
+        lowerCaseValue !== '' &&
+        invalidLetterState.includes(lowerCaseValue)
       ) {
-        newState[oppositeType][index] = '';
+        setErrorMsg(
+          `You can't put "${lowerCaseValue.toUpperCase()}" in GOOD and BAD spots at the same time`,
+        );
+        return false;
       }
 
-      return newState;
-    });
+      setValidLetterState((prev) => {
+        const newState = {
+          correct: [...prev.correct],
+          misplaced: [...prev.misplaced],
+        };
 
-    return true;
-  };
+        newState[type][index] = lowerCaseValue;
+
+        const oppositeType = type === 'correct' ? 'misplaced' : 'correct';
+        if (
+          lowerCaseValue === prev[oppositeType][index] &&
+          lowerCaseValue !== ''
+        ) {
+          newState[oppositeType][index] = '';
+        }
+
+        return newState;
+      });
+
+      return true;
+    },
+    [invalidLetterState],
+  );
 
   // On change function for correct letter state, variants of handleValidLetterStateChange
-  const handleCorrectLetterStateChange = (
-    index: number,
-    value: string,
-  ): boolean => {
-    return handleValidLetterStateChange('correct', index, value);
-  };
+  const handleCorrectLetterStateChange = useCallback(
+    (index: number, value: string): boolean => {
+      return handleValidLetterStateChange('correct', index, value);
+    },
+    [handleValidLetterStateChange],
+  );
 
   // On change function for misplaced letter state, variants of handleValidLetterStateChange
-  const handleMisplacedLetterStateChange = (
-    index: number,
-    value: string,
-  ): boolean => {
-    return handleValidLetterStateChange('misplaced', index, value);
-  };
+  const handleMisplacedLetterStateChange = useCallback(
+    (index: number, value: string): boolean => {
+      return handleValidLetterStateChange('misplaced', index, value);
+    },
+    [handleValidLetterStateChange],
+  );
 
   const handleInvalidLetterStateChange = (
     event: React.ChangeEvent<HTMLInputElement>,
@@ -152,7 +156,7 @@ const WordleSolver = () => {
   };
 
   // Get filtered words based on letterState
-  const getFilteredWords = async () => {
+  const getFilteredWords = useCallback(async () => {
     return new Promise<string[]>((resolve) => {
       setTimeout(() => {
         // Turn invalid letters array into a set for O(1) lookups
@@ -193,7 +197,13 @@ const WordleSolver = () => {
         resolve(filteredWords);
       }, 250);
     });
-  };
+  }, [
+    invalidLetterState,
+    validLetterState.correct,
+    validLetterState.misplaced,
+    wordBank,
+    wordleSize,
+  ]);
 
   // Solve handler function
   const handleSolve = async () => {
@@ -203,6 +213,7 @@ const WordleSolver = () => {
     }
 
     setPossibleWords([]);
+    setCurrentResultPage(1);
     setIsLoading(true);
 
     try {
@@ -217,7 +228,7 @@ const WordleSolver = () => {
 
   return (
     <section className="flex w-full max-w-3xl flex-col items-center space-y-4">
-      <Card className="flex min-w-[350px] flex-col items-center rounded-sm p-2 sm:w-[384px]">
+      <Card className="flex w-[350px] flex-col items-center rounded-sm p-2 sm:w-[384px]">
         <CardHeader className="flex w-full justify-between">
           <GameSelect wordleSize={wordleSize} setWordleSize={setWordleSize} />
         </CardHeader>
@@ -288,7 +299,12 @@ const WordleSolver = () => {
           </Button>
         </CardFooter>
       </Card>
-      <Results results={possibleWords} isLoading={isLoading} />
+      <Results
+        results={possibleWords}
+        isLoading={isLoading}
+        currentResultPage={currentResultPage}
+        setCurrentResultPage={setCurrentResultPage}
+      />
     </section>
   );
 };
