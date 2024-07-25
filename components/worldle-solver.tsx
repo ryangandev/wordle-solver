@@ -8,6 +8,7 @@ import { TrashIcon } from '@radix-ui/react-icons';
 import GameSelect from '@/components/game-select';
 import GridInput from '@/components/grid-input';
 import Results from '@/components/results';
+import { ThemeSwitch } from '@/components/theme-switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -19,6 +20,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { getWordsBySize } from '@/lib/data';
 import { ValidLetterState, WordleSize } from '@/lib/types';
+import Instruction from './instruction';
 
 const WordleSolver = () => {
   const [wordleSize, setWordleSize] = useState<WordleSize>(5);
@@ -228,77 +230,91 @@ const WordleSolver = () => {
 
   return (
     <section className="flex w-full max-w-3xl flex-col items-center space-y-4">
-      <Card className="flex w-[350px] flex-col items-center rounded-sm p-2 sm:w-[384px]">
-        <CardHeader className="flex w-full justify-between">
-          <GameSelect wordleSize={wordleSize} setWordleSize={setWordleSize} />
-        </CardHeader>
-        <CardContent className="flex w-full flex-col space-y-4">
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700" />
-              <span className="font-semibold">Correct Letters</span>
-              <ClearIconButton onClick={() => handleClearletters('correct')} />
+      <div className="flex w-full flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
+        {/* <Card className="flex w-[350px] flex-col items-center rounded p-2 sm:w-[384px] sm:min-w-[384px]"> */}
+        <Card className="flex w-full flex-col items-center rounded p-2">
+          <CardHeader className="w-full">
+            <div className="flex w-full items-center justify-between">
+              <GameSelect
+                wordleSize={wordleSize}
+                setWordleSize={setWordleSize}
+              />
+              <ThemeSwitch />
             </div>
-            <GridInput
-              letterInputs={validLetterState.correct}
-              onInputChange={handleCorrectLetterStateChange}
-              inputBackgroundColor="bg-green-700"
-            />
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center">
-              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-yellow-500" />
-              <span className="font-semibold">Misplaced Letters</span>
-              <ClearIconButton
-                onClick={() => handleClearletters('misplaced')}
+          </CardHeader>
+          <CardContent className="flex w-full flex-col space-y-4">
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700" />
+                <span className="font-semibold">Correct Letters</span>
+                <ClearIconButton
+                  onClick={() => handleClearletters('correct')}
+                />
+              </div>
+              <GridInput
+                letterInputs={validLetterState.correct}
+                onInputChange={handleCorrectLetterStateChange}
+                inputBackgroundColor="bg-green-700"
               />
             </div>
-            <GridInput
-              letterInputs={validLetterState.misplaced}
-              onInputChange={handleMisplacedLetterStateChange}
-              inputBackgroundColor="bg-yellow-500"
-            />
-          </div>
-          <div className="flex flex-col space-y-3">
-            <div className="flex items-center">
-              <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-gray-500" />
-              <span className="font-semibold">Invalid Letters</span>
-              <ClearIconButton onClick={() => handleClearletters('invalid')} />
+            <div className="space-y-3">
+              <div className="flex items-center">
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-yellow-500" />
+                <span className="font-semibold">Misplaced Letters</span>
+                <ClearIconButton
+                  onClick={() => handleClearletters('misplaced')}
+                />
+              </div>
+              <GridInput
+                letterInputs={validLetterState.misplaced}
+                onInputChange={handleMisplacedLetterStateChange}
+                inputBackgroundColor="bg-yellow-500"
+              />
             </div>
-            <Input
-              className="h-10 w-full text-base font-bold uppercase tracking-widest"
-              value={invalidLetterState}
-              onChange={handleInvalidLetterStateChange}
-              maxLength={26}
-            />
-          </div>
-          {errorMsg && (
-            <Alert
-              variant={'destructive'}
-              className="rounded bg-destructive/10 py-2 text-red-800"
+            <div className="flex flex-col space-y-3">
+              <div className="flex items-center">
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-gray-500" />
+                <span className="font-semibold">Invalid Letters</span>
+                <ClearIconButton
+                  onClick={() => handleClearletters('invalid')}
+                />
+              </div>
+              <Input
+                className="h-10 w-full text-base font-bold uppercase tracking-widest"
+                value={invalidLetterState}
+                onChange={handleInvalidLetterStateChange}
+                maxLength={26}
+              />
+            </div>
+            {errorMsg && (
+              <Alert
+                variant={'destructive'}
+                className="rounded bg-destructive/10 py-2 text-red-800"
+              >
+                <AlertDescription className="flex items-center text-xs font-semibold">
+                  <span className="mr-2">
+                    <IoWarningOutline className="h-4 w-4" />
+                  </span>
+                  <span>{errorMsg}</span>
+                </AlertDescription>
+              </Alert>
+            )}
+          </CardContent>
+          <CardFooter className="flex w-full justify-between">
+            <Button
+              variant="destructive"
+              onClick={handleReset}
+              disabled={!isLetterStateModified && !possibleWords.length}
             >
-              <AlertDescription className="flex items-center text-xs font-semibold">
-                <span className="mr-2">
-                  <IoWarningOutline className="h-4 w-4" />
-                </span>
-                <span>{errorMsg}</span>
-              </AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-        <CardFooter className="flex w-full justify-between">
-          <Button
-            variant="destructive"
-            onClick={handleReset}
-            disabled={!isLetterStateModified && !possibleWords.length}
-          >
-            Reset
-          </Button>
-          <Button onClick={handleSolve} disabled={false}>
-            Solve
-          </Button>
-        </CardFooter>
-      </Card>
+              Reset
+            </Button>
+            <Button onClick={handleSolve} disabled={false}>
+              Solve
+            </Button>
+          </CardFooter>
+        </Card>
+        <Instruction />
+      </div>
       <Results
         results={possibleWords}
         isLoading={isLoading}
