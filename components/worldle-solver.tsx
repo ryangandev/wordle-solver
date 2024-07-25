@@ -1,14 +1,21 @@
 'use client';
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { IoWarningOutline } from 'react-icons/io5';
 import { toast } from 'sonner';
 import { TrashIcon } from '@radix-ui/react-icons';
 
 import GameSelect from '@/components/game-select';
 import GridInput from '@/components/grid-input';
+import Instruction from '@/components/instruction';
 import Results from '@/components/results';
-import { ThemeSwitch } from '@/components/theme-switch';
+import ThemeSwitch from '@/components/theme-switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,7 +27,6 @@ import {
 import { Input } from '@/components/ui/input';
 import { getWordsBySize } from '@/lib/data';
 import { ValidLetterState, WordleSize } from '@/lib/types';
-import Instruction from './instruction';
 
 const WordleSolver = () => {
   const [wordleSize, setWordleSize] = useState<WordleSize>(5);
@@ -33,6 +39,8 @@ const WordleSolver = () => {
   const [possibleWords, setPossibleWords] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [currentResultPage, setCurrentResultPage] = useState<number>(1);
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
+  const resultSectionRef = useRef<HTMLDivElement>(null);
 
   const wordBank = useMemo(() => getWordsBySize(wordleSize), [wordleSize]);
 
@@ -46,6 +54,7 @@ const WordleSolver = () => {
     setPossibleWords([]);
     setErrorMsg('');
     setCurrentResultPage(1);
+    setHasSearched(false);
   }, [wordleSize]);
 
   useEffect(() => {
@@ -214,9 +223,11 @@ const WordleSolver = () => {
       return;
     }
 
+    setHasSearched(true);
     setPossibleWords([]);
     setCurrentResultPage(1);
     setIsLoading(true);
+    resultSectionRef.current?.scrollIntoView({ behavior: 'smooth' });
 
     try {
       const filteredWords = await getFilteredWords();
@@ -229,9 +240,8 @@ const WordleSolver = () => {
   };
 
   return (
-    <section className="flex w-full max-w-3xl flex-col items-center space-y-4">
+    <section className="flex w-full min-w-[350px] max-w-3xl flex-col items-center">
       <div className="flex w-full flex-col space-y-4 md:flex-row md:space-x-4 md:space-y-0">
-        {/* <Card className="flex w-[350px] flex-col items-center rounded p-2 sm:w-[384px] sm:min-w-[384px]"> */}
         <Card className="flex w-full flex-col items-center rounded p-2">
           <CardHeader className="w-full">
             <div className="flex w-full items-center justify-between">
@@ -242,7 +252,7 @@ const WordleSolver = () => {
               <ThemeSwitch />
             </div>
           </CardHeader>
-          <CardContent className="flex w-full flex-col space-y-4">
+          <CardContent className="flex flex-col space-y-4">
             <div className="space-y-3">
               <div className="flex items-center">
                 <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700" />
@@ -304,22 +314,30 @@ const WordleSolver = () => {
             <Button
               variant="destructive"
               onClick={handleReset}
-              disabled={!isLetterStateModified && !possibleWords.length}
+              disabled={
+                !isLetterStateModified &&
+                !possibleWords.length &&
+                !hasSearched &&
+                !errorMsg
+              }
             >
-              Reset
+              RESET
             </Button>
-            <Button onClick={handleSolve} disabled={false}>
-              Solve
+            <Button onClick={handleSolve} disabled={isLoading}>
+              SOLVE
             </Button>
           </CardFooter>
         </Card>
         <Instruction />
       </div>
       <Results
+        resultSectionRef={resultSectionRef}
+        wordleSize={wordleSize}
         results={possibleWords}
         isLoading={isLoading}
         currentResultPage={currentResultPage}
         setCurrentResultPage={setCurrentResultPage}
+        hasSearched={hasSearched}
       />
     </section>
   );

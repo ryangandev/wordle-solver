@@ -1,17 +1,23 @@
 import React from 'react';
+import { MdOutlineTipsAndUpdates } from 'react-icons/md';
+import { RxRocket } from 'react-icons/rx';
+
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from './ui/card';
+} from '@/components/ui/card';
 
 const Instruction = () => {
   return (
     <Card className="w-full rounded">
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg">How to use</CardTitle>
+        <CardTitle className="flex items-center text-lg">
+          <RxRocket className="mr-2 h-4 w-4 text-red-600" />
+          How to use
+        </CardTitle>
         <CardDescription>
           Find potential Wordle solutions based on your game feedback.
         </CardDescription>
@@ -22,23 +28,37 @@ const Instruction = () => {
           <li>
             Enter known information:
             <ul className="list-inside list-disc indent-4">
-              <li>Green letters in Correct Letters</li>
-              <li>Yellow letters in Correct Letters</li>
-              <li>Grey letters in Correct Letters</li>
+              <li>
+                <span className="font-bold text-green-700">Green</span> letters
+                in <b>Correct Letters</b>
+              </li>
+              <li>
+                <span className="font-bold text-yellow-700">Yellow</span>{' '}
+                letters in <b>Misplaced Letters</b>
+              </li>
+              <li>
+                <span className="font-bold text-gray-500">Grey</span> letters in{' '}
+                <b>Invalid Letters</b>
+              </li>
             </ul>
           </li>
-          <li>Click Solve to see possible words.</li>
+          <li>
+            Click <b>Solve</b> to see possible words.
+          </li>
         </ol>
       </CardContent>
       <CardHeader className="pb-2 pt-0">
-        <CardTitle className="text-lg">Wordle Strategies</CardTitle>
+        <CardTitle className="flex items-center text-lg">
+          <MdOutlineTipsAndUpdates className="mr-2 h-4 w-4 text-yellow-600" />
+          Wordle Strategies
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <ul className="list-inside list-disc space-y-1 text-sm">
           <li>
             Start with words containing common letters (<b>E</b>, <b>A</b>,{' '}
             <b>R</b>,<b>I</b>, <b>O</b>, <b>T</b>, <b>S</b>). Try <i>STARE</i>,{' '}
-            <i>AUDIO</i>, <i>ROATE</i>, etc.
+            <i>AUDIO</i>, <i>ROATE</i>, etc, to eliminate most words.
           </li>
           <li>
             For subsequent guesses, use unused letters to gather more

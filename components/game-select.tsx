@@ -12,8 +12,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { WordleSize } from '@/lib/types';
 import { wordleSizes } from '@/lib/data';
+import { WordleSize } from '@/lib/types';
 
 type GameSelectProps = {
   wordleSize: WordleSize;
