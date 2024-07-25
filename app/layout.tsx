@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import { Open_Sans } from 'next/font/google';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 import Footer from '@/components/footer';
 import { ThemeProvider } from '@/components/theme-provider';
@@ -32,6 +34,8 @@ export default function RootLayout({
           <Footer />
         </ThemeProvider>
         <Toaster position="top-center" richColors />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

@@ -113,7 +113,7 @@ const Results: React.FC<ResultsProps> = ({
   return (
     <section
       ref={resultSectionRef}
-      className="my-12 flex w-full flex-col space-y-4"
+      className="mt-8 flex w-full flex-col space-y-4 sm:mt-12"
     >
       {isLoading
         ? renderLoading()
