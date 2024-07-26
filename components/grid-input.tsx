@@ -2,6 +2,7 @@
 
 import React, { useRef, ChangeEvent, KeyboardEvent, memo } from 'react';
 
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
 type GridInputProps = {
@@ -50,13 +51,13 @@ const GridInput: React.FC<GridInputProps> = memo(
         )}
       >
         {letterInputs.map((letter, index) => (
-          <input
+          <Input
             key={index}
             ref={(el) => {
               inputRefs.current[index] = el;
             }}
             className={cn(
-              'flex h-11 w-11 items-center justify-center rounded-sm border border-gray-400 text-center text-2xl font-bold uppercase text-primary-foreground caret-black sm:h-12 sm:w-12',
+              'flex h-11 w-11 items-center justify-center rounded-sm border border-gray-300 text-center text-2xl font-bold uppercase text-primary-foreground caret-black dark:border-gray-700 dark:caret-white sm:h-12 sm:w-12',
               letter && inputBackgroundColor,
               letter && 'border-none',
             )}

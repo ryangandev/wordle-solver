@@ -29,21 +29,31 @@ const Instruction = () => {
             Enter known information:
             <ul className="list-inside list-disc indent-4">
               <li>
-                <span className="font-bold text-green-700">Green</span> letters
-                in <b>Correct Letters</b>
+                <span className="font-bold text-green-700 dark:text-green-500">
+                  Green
+                </span>{' '}
+                letters in <b>Correct Letters</b>
               </li>
               <li>
-                <span className="font-bold text-yellow-700">Yellow</span>{' '}
+                <span className="font-bold text-yellow-500 dark:text-yellow-400">
+                  Yellow
+                </span>{' '}
                 letters in <b>Misplaced Letters</b>
               </li>
               <li>
-                <span className="font-bold text-gray-500">Grey</span> letters in{' '}
-                <b>Invalid Letters</b>
+                <span className="font-bold text-gray-500 dark:text-gray-400">
+                  Grey
+                </span>{' '}
+                letters in <b>Invalid Letters</b>
               </li>
             </ul>
           </li>
           <li>
-            Click <b>Solve</b> to see possible words.
+            Click{' '}
+            <b>
+              <i>Solve</i>
+            </b>{' '}
+            to see possible words.
           </li>
         </ol>
       </CardContent>
@@ -57,7 +67,7 @@ const Instruction = () => {
         <ul className="list-inside list-disc space-y-1 text-sm">
           <li>
             Start with words containing common letters (<b>E</b>, <b>A</b>,{' '}
-            <b>R</b>,<b>I</b>, <b>O</b>, <b>T</b>, <b>S</b>). Try <i>STARE</i>,{' '}
+            <b>R</b>, <b>I</b>, <b>O</b>, <b>T</b>, <b>S</b>). Try <i>STARE</i>,{' '}
             <i>AUDIO</i>, <i>ROATE</i>, etc, to eliminate most words.
           </li>
           <li>

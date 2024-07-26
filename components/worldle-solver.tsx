@@ -255,7 +255,7 @@ const WordleSolver = () => {
           <CardContent className="flex flex-col space-y-4">
             <div className="space-y-3">
               <div className="flex items-center">
-                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700" />
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-green-700 dark:bg-green-500" />
                 <span className="font-semibold">Correct Letters</span>
                 <ClearIconButton
                   onClick={() => handleClearletters('correct')}
@@ -264,12 +264,12 @@ const WordleSolver = () => {
               <GridInput
                 letterInputs={validLetterState.correct}
                 onInputChange={handleCorrectLetterStateChange}
-                inputBackgroundColor="bg-green-700"
+                inputBackgroundColor="bg-green-700 dark:bg-green-500"
               />
             </div>
             <div className="space-y-3">
               <div className="flex items-center">
-                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-yellow-500" />
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-yellow-500 dark:bg-yellow-400" />
                 <span className="font-semibold">Misplaced Letters</span>
                 <ClearIconButton
                   onClick={() => handleClearletters('misplaced')}
@@ -278,12 +278,12 @@ const WordleSolver = () => {
               <GridInput
                 letterInputs={validLetterState.misplaced}
                 onInputChange={handleMisplacedLetterStateChange}
-                inputBackgroundColor="bg-yellow-500"
+                inputBackgroundColor="bg-yellow-500 dark:bg-yellow-400"
               />
             </div>
             <div className="flex flex-col space-y-3">
               <div className="flex items-center">
-                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-gray-500" />
+                <span className="mr-2 flex h-3.5 w-3.5 items-center justify-center rounded border bg-gray-500 dark:bg-gray-400" />
                 <span className="font-semibold">Invalid Letters</span>
                 <ClearIconButton
                   onClick={() => handleClearletters('invalid')}
@@ -299,7 +299,7 @@ const WordleSolver = () => {
             {errorMsg && (
               <Alert
                 variant={'destructive'}
-                className="rounded bg-destructive/10 py-2 text-red-800"
+                className="rounded bg-destructive/10 py-2 text-red-800 dark:text-red-300"
               >
                 <AlertDescription className="flex items-center text-xs font-semibold">
                   <span className="mr-2">
@@ -348,7 +348,7 @@ export default WordleSolver;
 const ClearIconButton = ({ onClick }: { onClick?: () => void }) => {
   return (
     <button
-      className="ml-auto cursor-pointer rounded-sm p-1 transition-colors hover:bg-gray-200"
+      className="ml-auto cursor-pointer rounded-sm p-1 transition-colors hover:bg-gray-200 dark:hover:bg-gray-700"
       onClick={onClick}
     >
       <TrashIcon />

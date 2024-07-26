@@ -66,7 +66,9 @@ const Results: React.FC<ResultsProps> = ({
       <>
         <h4 className="flex items-center">
           We found{' '}
-          <span className={cn('mx-2 text-green-700')}>{results.length}</span>{' '}
+          <span className={cn('mx-2 text-green-700 dark:text-green-500')}>
+            {results.length}
+          </span>{' '}
           results
         </h4>
         <div
