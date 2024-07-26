@@ -4,3 +4,6 @@ export type ValidLetterState = {
   correct: string[];
   misplaced: string[];
 };
+
+export type LetterFrequency = Map<string, number>;
+export type PositionFrequency = Map<number, LetterFrequency>;

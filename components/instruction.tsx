@@ -55,6 +55,13 @@ const Instruction = () => {
             </b>{' '}
             to see possible words.
           </li>
+          <li>
+            Turn on{' '}
+            <b>
+              <i>Smart Ranking</i>
+            </b>{' '}
+            to see words with higher possibilities first in the list.
+          </li>
         </ol>
       </CardContent>
       <CardHeader className="pb-2 pt-0">

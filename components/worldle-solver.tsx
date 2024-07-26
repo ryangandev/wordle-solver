@@ -25,8 +25,11 @@ import {
   CardHeader,
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { getWordsBySize } from '@/lib/data';
 import { ValidLetterState, WordleSize } from '@/lib/types';
+import { getFrequencies, scoreWord } from '@/lib/utils';
 
 const WordleSolver = () => {
   const [wordleSize, setWordleSize] = useState<WordleSize>(5);
@@ -41,8 +44,14 @@ const WordleSolver = () => {
   const [currentResultPage, setCurrentResultPage] = useState<number>(1);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const resultSectionRef = useRef<HTMLDivElement>(null);
+  const [smartRankingEnabled, setSmartRankingEnabled] =
+    useState<boolean>(false);
 
   const wordBank = useMemo(() => getWordsBySize(wordleSize), [wordleSize]);
+  const [globalLetterFreq, globalPositionFreq] = useMemo(
+    () => getFrequencies(wordBank),
+    [wordBank],
+  );
 
   // Reset all letter states
   const handleReset = useCallback(() => {
@@ -205,11 +214,24 @@ const WordleSolver = () => {
           return true;
         });
 
-        resolve(filteredWords);
+        if (!smartRankingEnabled) {
+          return resolve(filteredWords);
+        }
+
+        const sortedWords = filteredWords.sort(
+          (a, b) =>
+            scoreWord(b, globalLetterFreq, globalPositionFreq) -
+            scoreWord(a, globalLetterFreq, globalPositionFreq),
+        );
+
+        resolve(sortedWords);
       }, 250);
     });
   }, [
+    globalLetterFreq,
+    globalPositionFreq,
     invalidLetterState,
+    smartRankingEnabled,
     validLetterState.correct,
     validLetterState.misplaced,
     wordBank,
@@ -311,22 +333,32 @@ const WordleSolver = () => {
               </Alert>
             )}
           </CardContent>
-          <CardFooter className="flex w-full justify-between">
-            <Button
-              variant="destructive"
-              onClick={handleReset}
-              disabled={
-                !isLetterStateModified &&
-                !possibleWords.length &&
-                !hasSearched &&
-                !errorMsg
-              }
-            >
-              RESET
-            </Button>
-            <Button onClick={handleSolve} disabled={isLoading}>
-              SOLVE
-            </Button>
+          <CardFooter className="flex w-full flex-col space-y-4">
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="smart-ranking"
+                checked={smartRankingEnabled}
+                onCheckedChange={setSmartRankingEnabled}
+              />
+              <Label htmlFor="smart-ranking">Smart Ranking</Label>
+            </div>
+            <div className="flex w-full justify-between">
+              <Button
+                variant="destructive"
+                onClick={handleReset}
+                disabled={
+                  !isLetterStateModified &&
+                  !possibleWords.length &&
+                  !hasSearched &&
+                  !errorMsg
+                }
+              >
+                RESET
+              </Button>
+              <Button onClick={handleSolve} disabled={isLoading}>
+                SOLVE
+              </Button>
+            </div>
           </CardFooter>
         </Card>
         <Instruction />
