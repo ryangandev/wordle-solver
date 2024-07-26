@@ -225,6 +225,7 @@ const WordleSolver = () => {
 
     setHasSearched(true);
     setPossibleWords([]);
+    setErrorMsg('');
     setCurrentResultPage(1);
     setIsLoading(true);
     resultSectionRef.current?.scrollIntoView({ behavior: 'smooth' });

@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+<h1 align="center">Wordle Solver</h1>
 
-## Getting Started
+<p align="center">
+  <img src="https://github.com/ryangandev/wordle-solver/blob/main/app/favicon.ico" alt="Logo" width="200px">
+</p>
 
-First, run the development server:
+## 🚀 About
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
+A cheat tool that helps you acing Wordle games by finding potential Wordle solutions based on your game feedback. Check it out [here](https://wordle-solver-nu-seven.vercel.app/)!
+
+**What is Wordle?** Wordle is a word game where players have six attempts to guess a five-letter word, with feedback given for each guess in the form of coloured tiles indicating when letters match or occupy the correct position. Check out [New York Times Wordle](https://www.nytimes.com/games/wordle/)!
+
+## 🛠️ How to run
+
+### Set up
+
+1. **Clone the repository:**
+
+   ```
+   git clone https://github.com/ryangandev/wordle-solver.git
+   ```
+
+2. **Navigate to the project directory:**
+
+   ```
+   cd wordle-solver
+   ```
+
+3. **Install dependencies:**
+
+   ```
+   npm install -g pnpm
+   pnpm install
+   ```
+
+### Development server
+
+```
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- Navigate to `http://localhost:3000` in your web browser to view the app in development
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production build
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+```
+pnpm build
+pnpm start
+```
 
-## Learn More
+- Navigate to `http://localhost:3000` in your web browser to view the app in production build
 
-To learn more about Next.js, take a look at the following resources:
+## ⚙️ Technology Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- **[Next.js 14](https://nextjs.org/)**: Modern framework for building fast and user-friendly server-rendered React applications.
+- **[Tailwind CSS](https://tailwindcss.com/)**: A utility-first CSS framework for rapidly building modern applications
+- **[Shadcn UI](https://ui.shadcn.com/docs)**: A React component library that provide a set of customizable and reusable UI components
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+## 📝 License
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+This project is [MIT](https://github.com/ryangandev/wordle-solver/blob/main/LICENSE) licensed.
